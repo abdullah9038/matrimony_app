@@ -1,41 +1,37 @@
-name: Build Flutter APK
+name: Flutter CI
 
 on:
   push:
-    branches:
-      - main
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
-
-      - name: Set up JDK
-        uses: actions/setup-java@v3
-        with:
-          java-version: '11'
-          distribution: 'temurin'
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.24.0'
-          channel: 'stable'
+          flutter-version: "3.35.5"   # ✅ Matches Dart 3.5.4+
+          channel: "stable"
 
-      - name: Flutter clean
-        run: flutter clean
-
-      - name: Install dependencies
+      - name: Flutter pub get
         run: flutter pub get
 
-      - name: Build release APK
+      - name: Analyze project source
+        run: flutter analyze
+
+      - name: Run tests
+        run: flutter test
+
+      - name: Build APK
         run: flutter build apk --release
 
-      - name: Upload APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: app-release
-          path: build/app/outputs/flutter-apk/*.apk
-
+      # Optional: build appbundle for Play Store
+      - name: Build AppBundle
+        run: flutter build appbundle --release
