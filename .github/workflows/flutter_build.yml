@@ -1,10 +1,10 @@
-name: Flutter Android Build
+name: Flutter Debug APK Build
 
 on:
   push:
     branches:
-      - main   # or master if your repo default branch is master
-  workflow_dispatch: # lets you trigger manually from GitHub UI
+      - main   # Change if your repo uses 'master'
+  workflow_dispatch: # Allows manual trigger from GitHub UI
 
 jobs:
   build:
@@ -23,12 +23,12 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
-      - name: Build release APK
-        run: flutter build apk --release
+      - name: Build Debug APK
+        run: flutter build apk --debug
 
-      - name: Upload APK artifact
+      - name: Upload Debug APK
         uses: actions/upload-artifact@v4
         with:
-          name: release-apk
-          path: build/app/outputs/flutter-apk/app-release.apk
+          name: matrimony-debug-apk
+          path: build/app/outputs/flutter-apk/app-debug.apk
 
