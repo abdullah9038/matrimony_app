@@ -56,7 +56,64 @@ class LoginPage extends StatelessWidget {
               },
               child: const Text("Login"),
             ),
+            TextButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const RegistrationPage()),
+                );
+              },
+              child: const Text("Create Account"),
+            ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class RegistrationPage extends StatelessWidget {
+  const RegistrationPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final nameController = TextEditingController();
+    final ageController = TextEditingController();
+    final genderController = TextEditingController();
+    final locationController = TextEditingController();
+    final emailController = TextEditingController();
+    final passwordController = TextEditingController();
+
+    return Scaffold(
+      appBar: AppBar(title: const Text("Register")),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              TextField(controller: nameController, decoration: const InputDecoration(labelText: "Full Name")),
+              const SizedBox(height: 12),
+              TextField(controller: ageController, decoration: const InputDecoration(labelText: "Age")),
+              const SizedBox(height: 12),
+              TextField(controller: genderController, decoration: const InputDecoration(labelText: "Gender")),
+              const SizedBox(height: 12),
+              TextField(controller: locationController, decoration: const InputDecoration(labelText: "Location")),
+              const SizedBox(height: 12),
+              TextField(controller: emailController, decoration: const InputDecoration(labelText: "Email")),
+              const SizedBox(height: 12),
+              TextField(controller: passwordController, obscureText: true, decoration: const InputDecoration(labelText: "Password")),
+              const SizedBox(height: 24),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (context) => const HomePage()),
+                  );
+                },
+                child: const Text("Register"),
+              ),
+            ],
+          ),
         ),
       ),
     );
