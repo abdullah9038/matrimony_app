@@ -35,6 +35,8 @@ class _LoginPageState extends State<LoginPage> {
     final savedEmail = prefs.getString("email") ?? "";
     final savedPassword = prefs.getString("password") ?? "";
 
+    if (!mounted) return; // ✅ FIX added
+
     if (emailController.text == savedEmail &&
         passwordController.text == savedPassword) {
       Navigator.pushReplacement(
@@ -132,6 +134,7 @@ class RegistrationPage extends StatelessWidget {
               ElevatedButton(
                 onPressed: () async {
                   await saveUser();
+                  if (!context.mounted) return; // ✅ FIX added
                   Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(builder: (context) => const HomePage()),
