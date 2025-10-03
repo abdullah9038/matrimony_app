@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   runApp(const MatrimonyApp());
@@ -12,16 +13,40 @@ class MatrimonyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Matrimony App',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        primarySwatch: Colors.purple,
-      ),
+      theme: ThemeData(primarySwatch: Colors.purple),
       home: const LoginPage(),
     );
   }
 }
 
-class LoginPage extends StatelessWidget {
+class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
+
+  @override
+  State<LoginPage> createState() => _LoginPageState();
+}
+
+class _LoginPageState extends State<LoginPage> {
+  final emailController = TextEditingController();
+  final passwordController = TextEditingController();
+
+  Future<void> loginUser() async {
+    final prefs = await SharedPreferences.getInstance();
+    final savedEmail = prefs.getString("email") ?? "";
+    final savedPassword = prefs.getString("password") ?? "";
+
+    if (emailController.text == savedEmail &&
+        passwordController.text == savedPassword) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const HomePage()),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Invalid credentials!")),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -32,35 +57,26 @@ class LoginPage extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const TextField(
-              decoration: InputDecoration(
-                labelText: "Email",
-                border: OutlineInputBorder(),
-              ),
+            TextField(
+              controller: emailController,
+              decoration: const InputDecoration(
+                  labelText: "Email", border: OutlineInputBorder()),
             ),
             const SizedBox(height: 16),
-            const TextField(
+            TextField(
+              controller: passwordController,
               obscureText: true,
-              decoration: InputDecoration(
-                labelText: "Password",
-                border: OutlineInputBorder(),
-              ),
+              decoration: const InputDecoration(
+                  labelText: "Password", border: OutlineInputBorder()),
             ),
             const SizedBox(height: 24),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (context) => const HomePage()),
-                );
-              },
-              child: const Text("Login"),
-            ),
+            ElevatedButton(onPressed: loginUser, child: const Text("Login")),
             TextButton(
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const RegistrationPage()),
+                  MaterialPageRoute(
+                      builder: (context) => const RegistrationPage()),
                 );
               },
               child: const Text("Create Account"),
@@ -84,6 +100,16 @@ class RegistrationPage extends StatelessWidget {
     final emailController = TextEditingController();
     final passwordController = TextEditingController();
 
+    Future<void> saveUser() async {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString("name", nameController.text);
+      await prefs.setString("age", ageController.text);
+      await prefs.setString("gender", genderController.text);
+      await prefs.setString("location", locationController.text);
+      await prefs.setString("email", emailController.text);
+      await prefs.setString("password", passwordController.text);
+    }
+
     return Scaffold(
       appBar: AppBar(title: const Text("Register")),
       body: Padding(
@@ -104,7 +130,8 @@ class RegistrationPage extends StatelessWidget {
               TextField(controller: passwordController, obscureText: true, decoration: const InputDecoration(labelText: "Password")),
               const SizedBox(height: 24),
               ElevatedButton(
-                onPressed: () {
+                onPressed: () async {
+                  await saveUser();
                   Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(builder: (context) => const HomePage()),
@@ -159,12 +186,42 @@ class HomePage extends StatelessWidget {
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
 
+  Future<Map<String, String>> loadUser() async {
+    final prefs = await SharedPreferences.getInstance();
+    return {
+      "name": prefs.getString("name") ?? "",
+      "age": prefs.getString("age") ?? "",
+      "gender": prefs.getString("gender") ?? "",
+      "location": prefs.getString("location") ?? "",
+      "email": prefs.getString("email") ?? "",
+    };
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text("My Profile")),
-      body: const Center(
-        child: Text("Profile details will go here"),
+      body: FutureBuilder<Map<String, String>>(
+        future: loadUser(),
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          final user = snapshot.data!;
+          return Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text("Name: ${user["name"]}"),
+                Text("Age: ${user["age"]}"),
+                Text("Gender: ${user["gender"]}"),
+                Text("Location: ${user["location"]}"),
+                Text("Email: ${user["email"]}"),
+              ],
+            ),
+          );
+        },
       ),
     );
   }
